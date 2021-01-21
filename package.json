@@ -48,7 +48,7 @@
     "expo": "~38.0.8",
     "expo-status-bar": "^1.0.2",
     "global": "^4.4.0",
-    "immer": "^4.0.0",
+    "immer": "^8.0.1",
     "immutable": "^4.0.0-rc.12",
     "intl": "1.2.5",
     "lodash": "^4.17.15",
