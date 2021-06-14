@@ -1,20 +1,21 @@
 import { create } from 'apisauce';
+import snakeCase from 'lodash/snakeCase';
+import camelCase from 'lodash/camelCase';
 import mapKeysDeep from 'map-keys-deep';
-import { camelCase, snakeCase } from 'lodash';
-import { Config } from 'app/config';
+const ITUNES_URL = 'https://itunes.apple.com/';
 
-export const apiClients = {
-  configApi: null,
+const apiClients = {
+  itunes: null,
   default: null
 };
-export const getApiClient = (type = 'configApi') => apiClients[type];
-export const generateApiClient = (type = 'configApi') => {
+export const getApiClient = (type = 'itunes') => apiClients[type];
+export const generateApiClient = (type = 'itunes') => {
   switch (type) {
-    case 'configApi':
-      apiClients[type] = createApiClientWithTransForm(Config.API_URL);
+    case 'itunes':
+      apiClients[type] = createApiClientWithTransForm(ITUNES_URL);
       return apiClients[type];
     default:
-      apiClients.default = createApiClientWithTransForm(Config.API_URL);
+      apiClients.default = createApiClientWithTransForm(ITUNES_URL);
       return apiClients.default;
   }
 };

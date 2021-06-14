@@ -9,7 +9,7 @@ const styles = {
   logoContainer: {
     width: '100%',
     height: 150,
-    marginBottom: 25
+    marginBottom: 5
   },
   logo: {
     width: '100%',
