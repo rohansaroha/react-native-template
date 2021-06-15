@@ -1,41 +1,70 @@
-import React, { useEffect } from 'react';
-import { Button, Platform, SafeAreaView, Text, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Button, SafeAreaView, Text, TextInput } from 'react-native';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { PropTypes } from 'prop-types';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components/native';
-import LogoWithInstructions from '../../components/molecules/LogoWithInstructions';
+import isEmpty from 'lodash/isEmpty';
+import debounce from 'lodash/debounce';
+import Logo from '../../components/molecules/Logo';
 import { selectSongName, selectSongsData, selectSongsError } from './selectors';
 import { homeContainerCreators } from './reducer';
 
-const StyledBox = styled(Text)`
-  margin: 30px auto;
-`;
 function HomeScreen({
   songName,
   songsData,
   dispatchSongs,
-  dispatchClearSongsPlaylist
+  dispatchClearSongsPlaylist,
+  intl
 }) {
-  const instructions = Platform.select({
-    ios: 'Press Cmd+R to reload',
-    android: 'Double tap R on your keyboard to reload'
-  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (songsData && loading) {
+      // eslint-disable-next-line no-console
+      console.log('coming');
+      // eslint-disable-next-line no-console
+      console.log(songsData, songName);
+      setLoading(false);
+    }
+  }, [songsData]);
+
+  useEffect(() => {
+    if (songName && !songsData?.items?.length) {
+      dispatchSongs(songName);
+      setLoading(true);
+    }
+  }, []);
+
+  const handleOnChange = sName => {
+    // eslint-disable-next-line no-console
+    console.log('asds');
+    // eslint-disable-next-line no-console
+    console.log(songsData, songName, dispatchSongs);
+    if (!isEmpty(sName)) {
+      dispatchSongs(sName);
+      setLoading(true);
+    } else {
+      dispatchClearSongsPlaylist();
+    }
+  };
+  const debouncedHandleOnChange = debounce(handleOnChange, 200);
+
   const buttonHandler = () => {
     dispatchSongs('eminem');
   };
   return (
     <SafeAreaView>
-      <LogoWithInstructions instructions={instructions} />
+      <Logo />
       <TextInput
+        onChangeText={e => debouncedHandleOnChange(e)}
         underlineColorAndroid="transparent"
-        placeholder="Email"
+        placeholder={intl.formatMessage({ id: 'search_song' })}
         placeholderTextColor="#9a73ef"
         autoCapitalize="none"
       />
-      <Text>{songName}</Text>
       <Button onPress={buttonHandler} title="learn" />
     </SafeAreaView>
   );

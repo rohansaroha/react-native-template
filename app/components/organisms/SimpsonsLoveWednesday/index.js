@@ -4,7 +4,7 @@ import styled from 'styled-components/native';
 import { fonts } from '@themes';
 import If from '@molecules/If';
 import CharacterWithQuote from '@molecules/CharacterWithQuote';
-import LogoWithInstructions from '@molecules/LogoWithInstructions';
+import LogoWithInstructions from '@molecules/Logo';
 
 const Error = styled.Text`
   ${fonts.style.standard()};

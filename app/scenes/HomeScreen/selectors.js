@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import { initialState } from './reducer';
 
 /**
- * Direct selector to the HomeContainer state domain
+ * Direct selector to the HomeScreen state domain
  */
 
 const selectHomeContainerDomain = state => state.homeContainer || initialState;

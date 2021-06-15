@@ -9,12 +9,14 @@ export function* asyncGetSong(action) {
   const { data, ok } = response;
 
   if (ok) {
+    // eslint-disable-next-line no-console
+    console.log('yield songs', data.results);
     yield put(successGetSongs(data.results));
   } else {
     yield put(failureGetSongs(data));
   }
 }
 
-export default function* homeContainerSaga() {
+export default function* homeScreenSaga() {
   yield takeLatest(REQUEST_GET_SONGS, asyncGetSong);
 }
