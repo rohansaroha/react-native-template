@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { PropTypes } from 'prop-types';
+import PropTypes from 'prop-types';
 import { createStructuredSelector } from 'reselect';
 import { injectIntl } from 'react-intl';
 import styled from 'styled-components/native';
@@ -18,7 +18,6 @@ import debounce from 'lodash/debounce';
 import Logo from '../../components/molecules/Logo';
 import { selectSongName, selectSongsData, selectSongsError } from './selectors';
 import { homeContainerCreators } from './reducer';
-import { getSongs } from '../../services/iTunesApi';
 import If from '../../components/molecules/If';
 import SoundCard from '../../components/organisms/SoundCard';
 const { width } = Dimensions.get('window');
@@ -37,22 +36,13 @@ function HomeScreen({
   dispatchClearSongsPlaylist,
   intl
 }) {
-  const [loading, setLoading] = useState(false);
-  const [songsPlaylist, setSongsPlaylist] = useState([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [index, setIndex] = useState(0);
   const slider = useRef(null);
 
   useEffect(() => {
-    if (songsData && loading) {
-      setLoading(false);
-    }
-  }, [songsData]);
-
-  useEffect(() => {
     if (songName && !songsData?.items?.length) {
       dispatchSongs(songName);
-      setLoading(true);
     }
     // to set the index of current card
     scrollX.addListener(({ value }) => {
@@ -64,10 +54,6 @@ function HomeScreen({
   const handleOnChange = sName => {
     if (!isEmpty(sName)) {
       dispatchSongs(sName);
-      getSongs(sName).then(res => {
-        setSongsPlaylist(res.data.results);
-      });
-      setLoading(true);
     } else {
       dispatchClearSongsPlaylist();
     }
@@ -99,10 +85,10 @@ function HomeScreen({
         onChangeText={e => debouncedHandleOnChange(e)}
         placeholder={intl.formatMessage({ id: 'search_song' })}
       />
-      <If condition={songsPlaylist.length > 0}>
+      <If condition={songsData.length > 0}>
         <FlatList
           ref={slider}
-          data={songsPlaylist}
+          data={songsData}
           renderItem={renderSong}
           keyExtractor={(item, i) => i.toString()}
           horizontal
@@ -124,8 +110,7 @@ HomeScreen.propTypes = {
   dispatchSongs: PropTypes.func,
   songsData: PropTypes.array,
   songName: PropTypes.string,
-  dispatchClearSongsPlaylist: PropTypes.func,
-  navigation: PropTypes.any
+  dispatchClearSongsPlaylist: PropTypes.func
 };
 
 const mapStateToProps = createStructuredSelector({
