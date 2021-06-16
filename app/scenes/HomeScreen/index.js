@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Button,
+  FlatList,
   SafeAreaView,
-  ScrollView,
-  Text,
+  Dimensions,
   TextInput,
-  View
+  View,
+  Animated
 } from 'react-native';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -21,20 +21,27 @@ import { homeContainerCreators } from './reducer';
 import { getSongs } from '../../services/iTunesApi';
 import If from '../../components/molecules/If';
 import SoundCard from '../../components/organisms/SoundCard';
+const { width } = Dimensions.get('window');
 
-const MusicBoxContainer = styled(View)`
-  margin: 40px;
+const SearchBox = styled(TextInput)`
+  margin: 14px 16px 10px;
+  border-width: 0.5px;
+  border-color: #c4c3c3;
+  padding: 16px;
 `;
+
 function HomeScreen({
   songName,
   songsData,
   dispatchSongs,
   dispatchClearSongsPlaylist,
-  intl,
-  navigation
+  intl
 }) {
   const [loading, setLoading] = useState(false);
   const [songsPlaylist, setSongsPlaylist] = useState([]);
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [index, setIndex] = useState(0);
+  const slider = useRef(null);
 
   useEffect(() => {
     if (songsData && loading) {
@@ -47,6 +54,11 @@ function HomeScreen({
       dispatchSongs(songName);
       setLoading(true);
     }
+    // to set the index of current card
+    scrollX.addListener(({ value }) => {
+      const rawIndex = Math.round(value / width);
+      setIndex(rawIndex);
+    });
   }, []);
 
   const handleOnChange = sName => {
@@ -61,31 +73,52 @@ function HomeScreen({
     }
   };
   const debouncedHandleOnChange = debounce(handleOnChange, 200);
-
-  const buttonHandler = () => {
-    navigation.navigate('Profile');
+  const goNext = () => {
+    slider.current.scrollToOffset({
+      offset: (index + 1) * width
+    });
   };
+  const goPrevious = () => {
+    slider.current.scrollToOffset({
+      offset: (index - 1) * width
+    });
+  };
+
+  const renderSong = ({ item }) => (
+    <If condition={item.trackId}>
+      <View style={{ width, alignItems: 'center' }}>
+        <SoundCard song={item} goNext={goNext} goPrevious={goPrevious} />
+      </View>
+    </If>
+  );
+
   return (
     <SafeAreaView>
       <Logo />
-      <TextInput
+      <SearchBox
         onChangeText={e => debouncedHandleOnChange(e)}
-        underlineColorAndroid="transparent"
         placeholder={intl.formatMessage({ id: 'search_song' })}
-        placeholderTextColor="#9a73ef"
-        autoCapitalize="none"
       />
-      <Button onPress={buttonHandler} title="Search" />
       <If condition={songsPlaylist.length > 0}>
-        <ScrollView>
-          {songsPlaylist.map((song, index) => (
-            <SoundCard key={index} song={song} />
-          ))}
-        </ScrollView>
+        <FlatList
+          ref={slider}
+          data={songsPlaylist}
+          renderItem={renderSong}
+          keyExtractor={(item, i) => i.toString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          pagingEnabled
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: false }
+          )}
+        />
       </If>
     </SafeAreaView>
   );
 }
+
 HomeScreen.propTypes = {
   intl: PropTypes.object,
   dispatchSongs: PropTypes.func,
