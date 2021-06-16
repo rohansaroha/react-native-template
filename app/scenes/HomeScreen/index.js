@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Button, SafeAreaView, Text, TextInput } from 'react-native';
+import {
+  Button,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  View
+} from 'react-native';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { PropTypes } from 'prop-types';
@@ -11,22 +18,26 @@ import debounce from 'lodash/debounce';
 import Logo from '../../components/molecules/Logo';
 import { selectSongName, selectSongsData, selectSongsError } from './selectors';
 import { homeContainerCreators } from './reducer';
+import { getSongs } from '../../services/iTunesApi';
+import If from '../../components/molecules/If';
+import SoundCard from '../../components/organisms/SoundCard';
 
+const MusicBoxContainer = styled(View)`
+  margin: 40px;
+`;
 function HomeScreen({
   songName,
   songsData,
   dispatchSongs,
   dispatchClearSongsPlaylist,
-  intl
+  intl,
+  navigation
 }) {
   const [loading, setLoading] = useState(false);
+  const [songsPlaylist, setSongsPlaylist] = useState([]);
 
   useEffect(() => {
     if (songsData && loading) {
-      // eslint-disable-next-line no-console
-      console.log('coming');
-      // eslint-disable-next-line no-console
-      console.log(songsData, songName);
       setLoading(false);
     }
   }, [songsData]);
@@ -39,12 +50,11 @@ function HomeScreen({
   }, []);
 
   const handleOnChange = sName => {
-    // eslint-disable-next-line no-console
-    console.log('asds');
-    // eslint-disable-next-line no-console
-    console.log(songsData, songName, dispatchSongs);
     if (!isEmpty(sName)) {
       dispatchSongs(sName);
+      getSongs(sName).then(res => {
+        setSongsPlaylist(res.data.results);
+      });
       setLoading(true);
     } else {
       dispatchClearSongsPlaylist();
@@ -53,7 +63,7 @@ function HomeScreen({
   const debouncedHandleOnChange = debounce(handleOnChange, 200);
 
   const buttonHandler = () => {
-    dispatchSongs('eminem');
+    navigation.navigate('Profile');
   };
   return (
     <SafeAreaView>
@@ -65,7 +75,14 @@ function HomeScreen({
         placeholderTextColor="#9a73ef"
         autoCapitalize="none"
       />
-      <Button onPress={buttonHandler} title="learn" />
+      <Button onPress={buttonHandler} title="Search" />
+      <If condition={songsPlaylist.length > 0}>
+        <ScrollView>
+          {songsPlaylist.map((song, index) => (
+            <SoundCard key={index} song={song} />
+          ))}
+        </ScrollView>
+      </If>
     </SafeAreaView>
   );
 }
@@ -74,7 +91,8 @@ HomeScreen.propTypes = {
   dispatchSongs: PropTypes.func,
   songsData: PropTypes.array,
   songName: PropTypes.string,
-  dispatchClearSongsPlaylist: PropTypes.func
+  dispatchClearSongsPlaylist: PropTypes.func,
+  navigation: PropTypes.any
 };
 
 const mapStateToProps = createStructuredSelector({

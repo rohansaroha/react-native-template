@@ -22,10 +22,6 @@ export const {
 /* eslint-disable default-case, no-param-reassign */
 export const homeContainerReducer = (state = initialState, action) =>
   produce(state, draft => {
-    // eslint-disable-next-line no-console
-    console.log('state', state);
-    // eslint-disable-next-line no-console
-    console.log('Actions', action);
     switch (action.type) {
       case homeContainerTypes.REQUEST_GET_SONGS:
         draft.songName = action.songName;
