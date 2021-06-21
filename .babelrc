@@ -21,5 +21,12 @@
           }
         }
       ]
-    ]
-  }
+    ],
+    "env": {
+      "test": {
+        "presets": ["@babel/preset-env"],
+        "plugins": ["syntax-object-rest-spread", "transform-es2015-modules-commonjs"]
+      }
+    },
+    "presets": ["@babel/preset-env"]
+}
