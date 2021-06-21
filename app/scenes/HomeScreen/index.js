@@ -5,7 +5,8 @@ import {
   Dimensions,
   TextInput,
   View,
-  Animated
+  Animated,
+  Text
 } from 'react-native';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -18,7 +19,6 @@ import debounce from 'lodash/debounce';
 import Logo from '../../components/molecules/Logo';
 import { selectSongName, selectSongsData, selectSongsError } from './selectors';
 import { homeContainerCreators } from './reducer';
-import { getSongs } from '../../services/iTunesApi';
 import If from '../../components/molecules/If';
 import SoundCard from '../../components/organisms/SoundCard';
 const { width } = Dimensions.get('window');
@@ -29,6 +29,17 @@ const SearchBox = styled(TextInput)`
   border-color: #c4c3c3;
   padding: 16px;
 `;
+const CustomCard = styled(View)`
+  border-width: 0.5px;
+  padding: 32px 16px;
+  margin: 16px;
+  border-color: #c4c3c3;
+  text-align: center;
+  border-radius: 6px;
+`;
+const TextPrimary = styled(Text)`
+  color: #7f7f7f;
+`;
 
 function HomeScreen({
   songName,
@@ -38,7 +49,6 @@ function HomeScreen({
   intl
 }) {
   const [loading, setLoading] = useState(false);
-  const [songsPlaylist, setSongsPlaylist] = useState([]);
   const scrollX = useRef(new Animated.Value(0)).current;
   const [index, setIndex] = useState(0);
   const slider = useRef(null);
@@ -59,14 +69,14 @@ function HomeScreen({
       const rawIndex = Math.round(value / width);
       setIndex(rawIndex);
     });
+    return () => {
+      scrollX.removeListener();
+    };
   }, []);
 
   const handleOnChange = sName => {
     if (!isEmpty(sName)) {
       dispatchSongs(sName);
-      getSongs(sName).then(res => {
-        setSongsPlaylist(res.data.results);
-      });
       setLoading(true);
     } else {
       dispatchClearSongsPlaylist();
@@ -91,18 +101,26 @@ function HomeScreen({
       </View>
     </If>
   );
+  const renderEmptyPlaylist = () => (
+    <CustomCard>
+      <TextPrimary>
+        {intl.formatMessage({ id: 'empty_songs_text' })}
+      </TextPrimary>
+    </CustomCard>
+  );
 
   return (
     <SafeAreaView>
       <Logo />
       <SearchBox
+        value={songName}
         onChangeText={e => debouncedHandleOnChange(e)}
         placeholder={intl.formatMessage({ id: 'search_song' })}
       />
-      <If condition={songsPlaylist.length > 0}>
+      <If condition={songsData.length > 0} otherwise={renderEmptyPlaylist()}>
         <FlatList
           ref={slider}
-          data={songsPlaylist}
+          data={songsData}
           renderItem={renderSong}
           keyExtractor={(item, i) => i.toString()}
           horizontal
@@ -124,8 +142,7 @@ HomeScreen.propTypes = {
   dispatchSongs: PropTypes.func,
   songsData: PropTypes.array,
   songName: PropTypes.string,
-  dispatchClearSongsPlaylist: PropTypes.func,
-  navigation: PropTypes.any
+  dispatchClearSongsPlaylist: PropTypes.func
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -148,4 +165,4 @@ const withConnect = connect(mapStateToProps, mapDispatchToProps);
 
 export default compose(injectIntl, withConnect)(HomeScreen);
 
-export const HomeContainerTest = compose(injectIntl)(HomeScreen);
+export const HomeScreenTest = compose(injectIntl)(HomeScreen);

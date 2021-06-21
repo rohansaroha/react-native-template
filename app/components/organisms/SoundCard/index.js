@@ -28,11 +28,11 @@ const SongSecondary = styled(Text)`
 `;
 function SoundCard({ song, goNext, goPrevious }) {
   return (
-    <CustomCard data-testid="sound-card">
+    <CustomCard testID="sound-card">
       <AudioImg source={{ uri: song.artworkUrl100 }} />
       <SongPrimary>{song.trackName}</SongPrimary>
       <SongSecondary>{song.artistName}</SongSecondary>
-      <AudioController goNext={goNext} goPrevious={goPrevious} />
+      <AudioController goNext={goNext} goPrevious={goPrevious} song={song} />
     </CustomCard>
   );
 }

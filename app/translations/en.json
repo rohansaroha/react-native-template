@@ -6,5 +6,6 @@
   "wednesday_lover": "{username} loves Wednesday",
   "get_started": "To get started, edit App.js",
   "search_song": "Search your Favourite Song",
-  "play_song": "Play full Song"
+  "play_song": "Play full Song",
+  "empty_songs_text": "Search any Song by entering it's name in the SearchBox"
 }
